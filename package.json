@@ -1,0 +1,50 @@
+{
+  "name": "fh-service-request",
+  "version": "0.1.0",
+  "description": "",
+  "main": "lib/request.js",
+  "scripts": {
+    "linelint": "linelint lib/*.js",
+    "jshint": "jshint lib/*.js",
+    "check-coverage": "istanbul check-coverage --statements 100 --branches 100 --functions 100 --lines 100",
+    "cover": "istanbul cover _mocha ./test/",
+    "format": "npm run linelint && npm run jshint",
+    "unit": "mocha test/",
+    "test": "npm run format && npm run unit && npm run cover && npm run check-coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evanshortiss/fh-service-request.git"
+  },
+  "keywords": [
+    "fh",
+    "request",
+    "$fh.service",
+    "service",
+    "mbaas",
+    "$fh",
+    "rhmap"
+  ],
+  "author": "Evan Shortiss",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/evanshortiss/fh-service-request/issues"
+  },
+  "homepage": "https://github.com/evanshortiss/fh-service-request#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.4",
+    "linelint": "^1.0.1",
+    "mocha": "^3.0.2",
+    "proxyquire": "^1.7.10",
+    "request": "^2.74.0",
+    "sinon": "^1.17.5"
+  },
+  "dependencies": {
+    "bluebird": "~3.4.1",
+    "clear-require": "~1.0.1",
+    "env-var": "~2.0.0",
+    "url-join": "~1.1.0",
+    "verror": "~1.6.1"
+  }
+}
