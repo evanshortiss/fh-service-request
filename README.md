@@ -15,29 +15,30 @@ npm i fh-service-request --save
 ## Usage
 
 ```js
-var tasks = require('fh-service-request')({
+// Use this to make requests to MBaaS with the guid 48fhsf6mxzlyqi3ffbpkfh38
+var tasksMbaasRequest = require('fh-service-request')({
   guid: '48fhsf6mxzlyqi3ffbpkfh38'
 });
 
 // Make a GET request using the regular "request" module API
-tasks.get({
+tasksMbaasRequest.get({
   // Normally with the request module we'd pass "url" here, but since we're
   // using fh-service-request the MBaaS URL will be resolved for us and this
   // path will be appended to it
-  path: '/tasks',
+  uri: '/tasks',
 
-  // Tell request to parse responses as JSON
+  // Tell request to parse responses as JSON - typical request option
   json: true,
 
-  // Query for items owned by "feedhenry" user
+  // Query for items owned by "feedhenry" user - also a typical option
   qs: {
     owner: 'feedhenry'
   }
-}, function (err, res, tasks) {
+}, function (err, res, jsonData) {
   if (err) {
     console.error('request failed', err);
   } else {
-    console.log('tasks for "feedhenry"', tasks);
+    console.log('tasks for "feedhenry"', jsonData);
   }
 });
 ```
@@ -47,8 +48,8 @@ Switching between *$fh.service* and *fh-service-request* is relatively easy. The
 primary differences are:
 
 * *path* parameter is named *uri*
-* *params* is not supported in *fh-service-request*, use *json* or *qs*
-* *fh-service-request* is supplied the *guid* once only, when being created
+* *params* is not used in *fh-service-request*, use *json* or *qs* instead
+* *fh-service-request* is supplied the *guid* once only - when being created
 * *fh-service-request* supports the entire *request* module API
 * *body* and *res* are now in the same order as *request* passes them
 
@@ -61,9 +62,7 @@ $fh.service({
   method: 'GET',
   path: '/data',
   guid: '48fhsf6mxzlyqi3ffbpkfh38'
-}, function (err, body, res) {
-
-});
+}, function (err, body, res) {});
 ```
 
 ### fh-service-request
@@ -73,20 +72,17 @@ target a single MBaaS. This means you don't need to pass the *guid* in with
 each request, instead just at creation time.
 
 Due to the fact that *fh-service-request* is a thin wrapper around *request*
-you can even do fancy stuff such as using _req.pipe_.
+you can even do fancy stuff such as using _req.pipe_, and use shorthand methods
+such as _req.get_.
 
 ```js
 var request = require('fh-service-request')({
   guid: '48fhsf6mxzlyqi3ffbpkfh38'
 });
 
-$fh.service({
-  method: 'GET',
-  uri: '/data',
-  guid: '48fhsf6mxzlyqi3ffbpkfh38'
-}, function (err, res, body) {
-
-});
+request.get({
+  uri: '/data'
+}, function (err, res, body) {});
 ```
 
 
@@ -95,14 +91,16 @@ $fh.service({
 During local development you might want to redirect a request to an alternative
 host, and not hit your Red Hat Mobile instance. In the past, with $fh.service,
 this was done using an environment variable named *FH_SERVICE_MAP*, but to keep
-things simple, this is now accomplished by adding an _fhconfig.json_ to the root
-of your repository.
+things simple, this module will use an _fhconfig.json_ file in the root of your
+project to resolve development URLs.
 
 Here's a sample file:
 
 ```json
 {
   "domain": "your-domain.feedhenry.com",
+  "appId": "the id of this app from the app details screen",
+  "apiKey": "the api key from the app details screen",
   "services": {
     "48fhsf6mxzlyqi3ffbpkfh38": {
       "devUrl": "http://127.0.0.1:8001/",
@@ -113,13 +111,13 @@ Here's a sample file:
 
 ```
 
-The _services[GUID].devUrl_ property is used when your application is running locally
-to redirect requests to a host of your choosing.
+The _services[GUID].devUrl_ property is used when your application is running
+locally to redirect requests to a host of your choosing.
 
 
 ## fhconfig.json
 
-The fhconfig.json is a general configuration file we use to manage Red
+The fhconfig.json is a general configuration file we can use to manage Red
 Hat Mobile specific node.js application settings.
 
 Here's a sample:
@@ -127,6 +125,8 @@ Here's a sample:
 ```json
 {
   "domain": "your-domain.feedhenry.com",
+  "appId": "the id of this app from the app details screen",
+  "apiKey": "the api key from the app details screen",
   "services": {
     "48fhsf6mxzlyqi3ffbpkfh38": {
       "devUrl": "http://127.0.0.1:8001/",
@@ -159,19 +159,25 @@ Used to point MBaaS requests to a custom host during local development.
 ## Using Names for MBaaS Services
 
 ```js
-var tasks = require('fh-service-request')({
+var tasksMbaasRequest = require('fh-service-request')({
   // This will be resolved to 48fhsf6mxzlyqi3ffbpkfh38 for us. Magic
   name: 'MY_AUTH_SERVICE'
 });
 
-// Make a RESTful API call to GET /tasks?owner=feedhenry
-tasks.get({
-  path: '/tasks',
+// Make a HTTP request to GET /tasks?owner=feedhenry
+tasksMbaasRequest.get({
+  uri: '/tasks',
   json: true,
   qs: {
     owner: 'feedhenry'
   }
-}, function (err, res, tasks) {
-  console.log(err, tasks);
+}, function (err, res, jsonData) {
+  if (err) {
+    // Do something about it
+  } else if (res.statusCode !== 200) {
+    // Do something about this too
+  } else {
+    // yay! we got some JSON back!
+  }
 });
 ```

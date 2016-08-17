@@ -1,7 +1,7 @@
 {
   "name": "fh-service-request",
   "version": "0.1.0",
-  "description": "",
+  "description": "request module for making MBaaS requests on Red Hat Mobile",
   "main": "lib/request.js",
   "scripts": {
     "linelint": "linelint lib/*.js",
@@ -32,18 +32,18 @@
   },
   "homepage": "https://github.com/evanshortiss/fh-service-request#readme",
   "devDependencies": {
-    "chai": "^3.5.0",
-    "istanbul": "^0.4.4",
-    "linelint": "^1.0.1",
-    "mocha": "^3.0.2",
-    "proxyquire": "^1.7.10",
-    "request": "^2.74.0",
-    "sinon": "^1.17.5"
+    "chai": "~3.5.0",
+    "istanbul": "~0.4.4",
+    "linelint": "~1.0.1",
+    "mocha": "~3.0.2",
+    "proxyquire": "~1.7.10",
+    "sinon": "~1.17.5"
   },
   "dependencies": {
     "bluebird": "~3.4.1",
     "clear-require": "~1.0.1",
     "env-var": "~2.0.0",
+    "request": "~2.74.0",
     "url-join": "~1.1.0",
     "verror": "~1.6.1"
   }

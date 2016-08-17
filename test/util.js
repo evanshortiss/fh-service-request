@@ -4,6 +4,7 @@ var expect = require('chai').expect
   , sinon = require('sinon')
   , proxyquire = require('proxyquire');
 
+
 describe('util', function () {
   var mod, env, envStub;
 
