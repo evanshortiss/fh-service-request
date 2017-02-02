@@ -9,7 +9,7 @@
     "check-coverage": "istanbul check-coverage --statements 100 --branches 100 --functions 100 --lines 100",
     "cover": "istanbul cover _mocha ./test/",
     "format": "npm run linelint && npm run jshint",
-    "unit": "mocha test/",
+    "unit": "mocha -R tap test/",
     "test": "npm run format && npm run unit && npm run cover && npm run check-coverage"
   },
   "repository": {
@@ -43,6 +43,7 @@
     "bluebird": "~3.4.1",
     "clear-require": "~1.0.1",
     "env-var": "~2.0.0",
+    "fh-instance-url": "~1.1.1",
     "request": "~2.74.0",
     "url-join": "~1.1.0",
     "verror": "~1.6.1"

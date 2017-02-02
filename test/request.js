@@ -31,7 +31,9 @@ describe('request', function () {
     initialiserStub = sinon.stub();
 
     mod = proxyquire('../lib/request', {
-      'fh-instance-url': guidLookupStub,
+      'fh-instance-url': {
+        getUrl: guidLookupStub
+      },
       './init-request': initRequestStub,
       './util': {
         getGuidForAppName: getGuidStub,
@@ -180,7 +182,7 @@ describe('request', function () {
         expect(
           initRequestStub.getCall(0).args[1].timeout
         ).to.equal(DEFAULTS.timeout);
-        
+
         expect(
           initRequestStub.getCall(0).args[1].json
         ).to.equal(DEFAULTS.json);
