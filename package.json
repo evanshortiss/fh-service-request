@@ -44,8 +44,10 @@
     "clear-require": "~1.0.1",
     "env-var": "~2.0.0",
     "fh-instance-url": "~1.1.1",
+    "lodash.get": "~4.4.2",
     "request": "~2.74.0",
     "url-join": "~1.1.0",
-    "verror": "~1.6.1"
+    "verror": "~1.6.1",
+    "xtend": "~4.0.1"
   }
 }
