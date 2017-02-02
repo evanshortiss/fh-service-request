@@ -159,19 +159,20 @@ Used to point MBaaS requests to a custom host during local development.
 ## Using Names for MBaaS Services
 
 ```js
-var tasksMbaasRequest = require('fh-service-request')({
-  // This will be resolved to 48fhsf6mxzlyqi3ffbpkfh38 for us. Magic
+var authMbaasRequest = require('fh-service-request')({
+  // This will be resolved to a GUID in fhconfig.json for us. Magic.
   name: 'MY_AUTH_SERVICE'
 });
 
 // Make a HTTP request to GET /tasks?owner=feedhenry
-tasksMbaasRequest.get({
-  uri: '/tasks',
+authMbaasRequest.post({
+  uri: '/login',
   json: true,
-  qs: {
-    owner: 'feedhenry'
+  body: {
+    user: 'feedhenry',
+    pass: 's3cr3tpassw0rd'
   }
-}, function (err, res, jsonData) {
+}, function (err, res, jsonResponse) {
   if (err) {
     // Do something about it
   } else if (res.statusCode !== 200) {
