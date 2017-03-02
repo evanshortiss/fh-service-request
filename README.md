@@ -182,3 +182,11 @@ authMbaasRequest.post({
   }
 });
 ```
+
+## Changlog
+
+* 0.1.0
+  * Fix bug where multiple instances causes recursive `request.init` calls
+  * Improve test coverage
+
+* 0.1.0 - Initial release

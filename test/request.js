@@ -18,6 +18,8 @@ describe('request', function () {
     , TEST_URL;
 
   beforeEach(function () {
+    require('clear-require').all();
+    
     VALID_OPTS = {
       guid: '48fhsf6mxzlyqi3ffbpkfh38'
     };
