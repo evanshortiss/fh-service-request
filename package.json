@@ -1,6 +1,6 @@
 {
   "name": "fh-service-request",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "request module for making MBaaS requests on Red Hat Mobile",
   "main": "lib/request.js",
   "scripts": {
