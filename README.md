@@ -185,6 +185,9 @@ authMbaasRequest.post({
 
 ## Changlog
 
+* 0.1.3
+  * Ensure required headers are included with requests.
+
 * 0.1.0
   * Fix bug where multiple instances causes recursive `request.init` calls
   * Improve test coverage
