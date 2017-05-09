@@ -185,6 +185,9 @@ authMbaasRequest.post({
 
 ## Changlog
 
+* 0.1.4
+  * Add logging using the `debug` module.
+
 * 0.1.3
   * Ensure required headers are included with requests.
 
