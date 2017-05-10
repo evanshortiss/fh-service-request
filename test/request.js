@@ -19,7 +19,7 @@ describe('request', function () {
 
   beforeEach(function () {
     require('clear-require').all();
-    
+
     VALID_OPTS = {
       guid: '48fhsf6mxzlyqi3ffbpkfh38'
     };
@@ -72,7 +72,6 @@ describe('request', function () {
       var req = mod(VALID_OPTS);
 
       expect(req).to.be.a('function');
-      expect(req.get).to.be.a('function');
     });
 
     it('should fail to make request - guid lookup error', function (done) {
@@ -159,35 +158,6 @@ describe('request', function () {
         expect(guidLookupStub.called).to.be.true;
         expect(initRequestStub.called).to.be.true;
         expect(initialiserStub.calledWith(TEST_URL)).to.be.true;
-
-        done();
-      });
-    });
-
-    it('should support request.defaults functionality', function (done) {
-      var DEFAULTS = {
-        json: true,
-        timeout: 15000,
-      };
-
-      var req = mod(VALID_OPTS).defaults(DEFAULTS);
-
-      initialiserStub.returns(Promise.reject(new Error('oops')));
-      guidLookupStub.yields(null, TEST_URL);
-      initRequestStub.returns(initialiserStub);
-
-      req({
-        uri: '/tasks'
-      }, function (err) {
-        expect(err).to.exist;
-
-        expect(
-          initRequestStub.getCall(0).args[1].timeout
-        ).to.equal(DEFAULTS.timeout);
-
-        expect(
-          initRequestStub.getCall(0).args[1].json
-        ).to.equal(DEFAULTS.json);
 
         done();
       });

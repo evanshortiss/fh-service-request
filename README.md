@@ -1,8 +1,10 @@
 fh-service-request
 ==================
 
-Like $fh.service, but exposes the full _request_ API meaning you get all of that
-goodness that you're used to, plus MBaaS benefits.
+Like $fh.service, but exposes the regular `request` API meaning you get the
+regular `request` goodness that you're used to via MBaaS calls.
+
+Currently `request` sugar methods such as `request.get` etc. are not supported!
 
 
 ## Install
@@ -21,7 +23,9 @@ var tasksMbaasRequest = require('fh-service-request')({
 });
 
 // Make a GET request using the regular "request" module API
-tasksMbaasRequest.get({
+tasksMbaasRequest({
+  method: 'GET',
+
   // Normally with the request module we'd pass "url" here, but since we're
   // using fh-service-request the MBaaS URL will be resolved for us and this
   // path will be appended to it
@@ -50,7 +54,7 @@ primary differences are:
 * *path* parameter is named *uri*
 * *params* is not used in *fh-service-request*, use *json* or *qs* instead
 * *fh-service-request* is supplied the *guid* once only - when being created
-* *fh-service-request* supports the entire *request* module API
+* *fh-service-request* supports the *request* module API and _pipe_
 * *body* and *res* are now in the same order as *request* passes them
 
 ### $fh.service
@@ -80,7 +84,8 @@ var request = require('fh-service-request')({
   guid: '48fhsf6mxzlyqi3ffbpkfh38'
 });
 
-request.get({
+request({
+  method: 'GET',
   uri: '/data'
 }, function (err, res, body) {});
 ```
@@ -165,7 +170,8 @@ var authMbaasRequest = require('fh-service-request')({
 });
 
 // Make a HTTP request to GET /tasks?owner=feedhenry
-authMbaasRequest.post({
+authMbaasRequest({
+  method: 'POST',
   uri: '/login',
   json: true,
   body: {
@@ -183,7 +189,12 @@ authMbaasRequest.post({
 });
 ```
 
-## Changlog
+## CHANGELOG
+
+* 0.2.0
+  * Fix bug where if you created multiple instances all requests went to just a
+  single mBaaS.
+  * Temporarily remove support for `request.defaults`, `request.get`, etc.
 
 * 0.1.4
   * Add logging using the `debug` module.
