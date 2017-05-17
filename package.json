@@ -6,7 +6,7 @@
   "scripts": {
     "linelint": "linelint lib/*.js",
     "jshint": "eslint lib/*.js",
-    "check-coverage": "istanbul check-coverage --statements 100 --branches 100 --functions 100 --lines 100",
+    "check-coverage": "istanbul check-coverage --statements 95 --branches 95 --functions 95 --lines 95",
     "cover": "istanbul cover _mocha ./test/",
     "format": "npm run linelint && npm run jshint",
     "unit": "mocha -R spec test/",
