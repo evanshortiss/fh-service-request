@@ -1,7 +1,7 @@
 fh-service-request
 ==================
 
-Like $fh.service, but exposes the regular `request` API meaning you get the
+Like $fh.service, but exposes the full `request` API meaning you can get the
 regular `request` goodness that you're used to via MBaaS calls.
 
 Currently `request` sugar methods such as `request.get` etc. are not supported!
@@ -38,13 +38,13 @@ tasksMbaasRequest({
   qs: {
     owner: 'feedhenry'
   }
-}, function (err, res, jsonData) {
-  if (err) {
+})
+  .then((res) -> {
+      console.log('tasks for "feedhenry"', res.body);
+  })
+  .catch((err) => {
     console.error('request failed', err);
-  } else {
-    console.log('tasks for "feedhenry"', jsonData);
-  }
-});
+  });
 ```
 
 ## fh-service-request vs. $fh.service
@@ -55,7 +55,10 @@ primary differences are:
 * *params* is not used in *fh-service-request*, use *json* or *qs* instead
 * *fh-service-request* is supplied the *guid* once only - when being created
 * *fh-service-request* supports the *request* module API and _pipe_
-* *body* and *res* are now in the same order as *request* passes them
+* *fh-service-request* returns a Promise with the *res* Object the regular
+request module provides.
+* *fh-service-request* can be passed a *pipe* flag in the request options to
+return the regular *request* instance for piping data.
 
 ### $fh.service
 
@@ -87,7 +90,13 @@ var request = require('fh-service-request')({
 request({
   method: 'GET',
   uri: '/data'
-}, function (err, res, body) {});
+})
+  .then((res) => {
+    // check res.statusCode
+  })
+  .catch((err) => {
+    console.error('request failed', err);
+  });
 ```
 
 
@@ -160,6 +169,24 @@ GUID when making calls to services for improved readability.
 #### services[GUID].devUrl
 Used to point MBaaS requests to a custom host during local development.
 
+## Piping Data
+
+```js
+const fs = require('fs');
+const serviceCall = require('fh-service-request')({
+  // This will be resolved to a GUID in fhconfig.json for us. Magic.
+  name: '48fhsf6mxzlyqi3ffbpkfh38'
+});
+
+serviceCall({
+  pipe: true,
+  uri: '/get-data'
+})
+  .then((request) => {
+    // Write data to the file in chunks as it arrives
+    request.pipe(fs.createWriteStream('./response-data.txt'));
+  });
+```
 
 ## Using Names for MBaaS Services
 
@@ -178,15 +205,7 @@ authMbaasRequest({
     user: 'feedhenry',
     pass: 's3cr3tpassw0rd'
   }
-}, function (err, res, jsonResponse) {
-  if (err) {
-    // Do something about it
-  } else if (res.statusCode !== 200) {
-    // Do something about this too
-  } else {
-    // yay! we got some JSON back!
-  }
-});
+}).then(successFn).catch(erroFn);
 ```
 
 ## CHANGELOG

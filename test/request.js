@@ -1,21 +1,24 @@
 'use strict';
 
-var expect = require('chai').expect
-  , sinon = require('sinon')
-  , Promise = require('bluebird')
-  , proxyquire = require('proxyquire');
+const expect = require('chai').expect;
+const sinon = require('sinon');
+const Promise = require('bluebird');
+const proxyquire = require('proxyquire').noCallThru().noPreserveCache();
 
 // require('sinon-as-promised')(require('bluebird'));
 
 describe('request', function () {
   var mod
-    , getGuidStub
+    , stubs
     , getDomainStub
     , initRequestStub
-    , guidLookupStub
     , initialiserStub
     , VALID_OPTS
     , TEST_URL;
+
+  const REQUEST = 'request';
+  const INSTANCE_URL = 'fh-instance-url';
+  const UTIL = './util';
 
   beforeEach(function () {
     require('clear-require').all();
@@ -26,22 +29,21 @@ describe('request', function () {
 
     TEST_URL = 'https://test.feedhenry.com';
 
-    guidLookupStub = sinon.stub();
-    getGuidStub = sinon.stub();
-    initRequestStub = sinon.stub();
     getDomainStub = sinon.stub().returns(TEST_URL);
-    initialiserStub = sinon.stub();
 
-    mod = proxyquire('../lib/request', {
-      'fh-instance-url': {
-        getUrl: guidLookupStub
+    stubs = {
+      [REQUEST]: sinon.stub(),
+      [INSTANCE_URL]: {
+        getUrl: sinon.stub(),
+        getServiceCallHeaders: sinon.stub()
       },
-      './init-request': initRequestStub,
-      './util': {
-        getGuidForAppName: getGuidStub,
+      [UTIL]: {
+        getGuidForAppName: sinon.stub(),
         getDomain: getDomainStub,
       }
-    });
+    };
+
+    mod = proxyquire('../lib/request', stubs);
   });
 
   describe('#getFhRequestInstance', function () {
@@ -74,93 +76,103 @@ describe('request', function () {
       expect(req).to.be.a('function');
     });
 
-    it('should fail to make request - guid lookup error', function (done) {
+    it('should fail to make request - guid lookup error', function () {
       var req = mod(VALID_OPTS);
 
-      guidLookupStub.yields(new Error('ECONREFUSED - guid lookup failed'));
+      stubs[INSTANCE_URL].getUrl.yields(new Error('ECONREFUSED - guid lookup failed'));
 
-      req({
+      return req({
         uri: '/tasks'
-      }, function (err) {
-        expect(err).to.exist;
-        expect(err.message).to.contain('ECONREFUSED - guid lookup failed');
-        done();
-      });
-    });
-
-    it('should have request fail (event) - guid lookup fail', function (done) {
-      var req = mod(VALID_OPTS);
-
-      guidLookupStub.yields(new Error('ECONREFUSED - guid lookup failed'));
-
-      var emitter = req({
-        uri: '/tasks'
-      });
-
-      emitter.on(
-        'error',
-        function (err) {
+      })
+        .then(() => {
+          throw new Error('not the error we want');
+        })
+        .catch((err) => {
           expect(err).to.exist;
           expect(err.message).to.contain('ECONREFUSED - guid lookup failed');
-          done();
-        }
-      );
+        });
     });
 
-    it('should initialise request with expected url', function (done) {
-      var callback = sinon.spy();
-
-      initialiserStub.yields(null);
-      guidLookupStub.yields(null, TEST_URL);
-      initRequestStub.returns(initialiserStub);
-
-      mod(VALID_OPTS)({
-        uri: '/tasks'
-      }, callback);
-
-      setTimeout(function () {
-        expect(guidLookupStub.called).to.be.true;
-        expect(initRequestStub.called).to.be.true;
-        expect(initialiserStub.calledWith(TEST_URL)).to.be.true;
-
-        done();
-      }, 25);
+    it('should throw an error if given an invalid opts.name', function () {
+      expect(function () {
+        mod({
+          name: 'not-valid'
+        });
+      }).to.throw('no entry was found');
     });
 
-    it('should handle request init error (event)', function (done) {
-      initialiserStub.returns(Promise.reject(new Error('oops')));
-      guidLookupStub.yields(null, TEST_URL);
-      initRequestStub.returns(initialiserStub);
+    it('should perform request with expected uri', function () {
+      const headers = {
+        'x-char-string': 'abc'
+      };
 
-      var req = mod(VALID_OPTS)({
+      stubs[INSTANCE_URL].getUrl.yields(null, TEST_URL);
+      stubs[REQUEST].yields(null, {statusCode: 200});
+      stubs[INSTANCE_URL].getServiceCallHeaders.returns(headers);
+
+      const req = mod(VALID_OPTS);
+
+      return req({
         uri: '/tasks'
-      });
-
-      req.on('error', function (err) {
-        expect(err).to.exist;
-        expect(guidLookupStub.called).to.be.true;
-        expect(initRequestStub.called).to.be.true;
-        expect(initialiserStub.calledWith(TEST_URL)).to.be.true;
-
-        done();
-      });
+      })
+        .then((res) => {
+          expect(stubs[INSTANCE_URL].getUrl.calledOnce).to.be.true;
+          expect(stubs[REQUEST].getCall(0).args[0]).to.deep.equal({
+            uri: `${TEST_URL}/tasks`,
+            headers: headers
+          });
+        });
     });
 
-    it('should handle request init error (callback)', function (done) {
-      initialiserStub.returns(Promise.reject(new Error('oops')));
-      guidLookupStub.yields(null, TEST_URL);
-      initRequestStub.returns(initialiserStub);
+    it('should perform request with expected url (uri)', function () {
+      const headers = {
+        'x-char-string': 'abc'
+      };
 
-      mod(VALID_OPTS)({
+      stubs[INSTANCE_URL].getUrl.yields(null, TEST_URL);
+      stubs[REQUEST].yields(null, {statusCode: 200});
+      stubs[INSTANCE_URL].getServiceCallHeaders.returns(headers);
+
+      const req = mod(VALID_OPTS);
+
+      return req({
+        url: '/tasks'
+      })
+        .then((res) => {
+          expect(stubs[INSTANCE_URL].getUrl.calledOnce).to.be.true;
+          expect(stubs[REQUEST].getCall(0).args[0]).to.deep.equal({
+            uri: `${TEST_URL}/tasks`,
+            headers: headers
+          });
+        });
+    });
+
+    it('should perform request and return the request instance', function () {
+      const headers = {
+        'x-char-string': 'abc'
+      };
+
+      const requestStub = sinon.stub();
+
+      stubs[INSTANCE_URL].getUrl.yields(null, TEST_URL);
+      stubs[REQUEST].returns(requestStub);
+      stubs[INSTANCE_URL].getServiceCallHeaders.returns(headers);
+
+      const req = mod(VALID_OPTS);
+
+      return req({
+        pipe: true,
         uri: '/tasks'
-      }, function (err) {
-        expect(err).to.exist;
-        expect(guidLookupStub.called).to.be.true;
-        expect(initRequestStub.called).to.be.true;
-        expect(initialiserStub.calledWith(TEST_URL)).to.be.true;
+      })
+        .then((request) => {
+          expect(stubs[INSTANCE_URL].getUrl.calledOnce).to.be.true;
+          expect(stubs[REQUEST].getCall(0).args[0]).to.deep.equal({
+            uri: `${TEST_URL}/tasks`,
+            headers: headers
+          });
 
-        done();
-      });
+          expect(requestStub).to.equal(request);
+        });
     });
   });
 

@@ -47,9 +47,9 @@ describe('util', function () {
     });
 
     it('should return the guid from a cache', function () {
-      expect(mod.getGuidForAppName('MY_AUTH_SERVICE')).to.equal(
-        '48fhsf6mxzlyqi3ffbpkfh38'
-      );
+      const guid = mod.getGuidForAppName('MY_AUTH_SERVICE');
+
+      expect(mod.getGuidForAppName('MY_AUTH_SERVICE')).to.equal(guid);
     });
 
     it('should return the null for the given name alias', function () {
